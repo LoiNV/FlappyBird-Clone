@@ -9,7 +9,9 @@ _text,
 _score,
 _splash,
 _buttons,
-_numberS;
+_numberS,
+_numberB,
+_medal;
 
 
 function Sprite(img, x, y, width, height) {
@@ -20,11 +22,11 @@ function Sprite(img, x, y, width, height) {
 	this.height = height;
 };
 
-Sprite.prototype.draw = function(ctx, x, y) {
+Sprite.prototype.draw = function(ctx, x, y, scale) {
 	ctx.drawImage ( this.img,
-					this.x, this.y,          // cat tu toa do x,y trong hinh goc
-				 	this.width, this.height, // do rong ,chieu cao hinh cat
-					x, y, this.width, this.height 	 // ve vao cavas tu toa do x,y,rong,cao
+					this.x, this.y,          				  // cắt từ tọa đọ x,y trong hình gốc
+				 	this.width, this.height, 				  // đọ rộng, chiều cao hình cắt
+					x, y, this.width*scale, this.height*scale // vẽ vào tọa độ x,y,rộng,cao
 				);
 };
 
@@ -35,10 +37,6 @@ function initSprites(img) {
 		new Sprite(img, 312, 256, 34, 24),
 		new Sprite(img, 312, 282, 34, 24)
 	];
-
-	_bird.draw = function(ctx, x, y, width, height){
-		ctx.drawImage(this.img, this.x, this.y, this.width, this.height, x, y, width, height);
-	}
 
 	_bg = new Sprite(img, 0, 0, 276, 224);
 	_bg.color = "#70C5CF";
@@ -54,16 +52,28 @@ function initSprites(img) {
 		GameOver: new Sprite(img, 118, 272, 188, 38),
 		GetReady: new Sprite(img, 118, 310, 174, 44)
 	}
+
 	_score = new Sprite(img, 276,  112, 226, 116);
 	_splash = new Sprite(img, 0, 228, 118, 98);
 
+	_medal = {
+		none: new Sprite(img, 348, 228, 44, 44),
+		coper: new Sprite(img, 396, 274, 44, 44),
+		silver: new Sprite(img, 396, 228, 44, 44),
+		gold: new Sprite(img, 348, 274, 44, 44)
+	}
+
+	_numberB = new Sprite(img, 0, 354, 12, 14);
 	_numberS = new Sprite(img, 0, 376, 14, 20);
 
-	_numberS.draw = function(ctx, x, y, num)
+
+	_numberS.draw = _numberB.draw = function(ctx, x, y, num)
 	{
 		num = num.toString();
 
 		var step = this.width + 2;
+
+		x += step*(10 - num.length);
 
 		for (var i = 0, len = num.length; i < len; i++) {
 			var n = parseInt(num[i]);

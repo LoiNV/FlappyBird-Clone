@@ -7,6 +7,7 @@ var
 	fgPos = 0,
 	frames = 0,
 	score = 0,
+	best = localStorage.getItem("best") || 0,
 
 	btnOK,
 	sound,
@@ -14,7 +15,7 @@ var
 	states = {
 		Splash: 0, Game: 1, Score: 2
 	},
-
+	// chim
 	bird = {
 
 		x: 60,
@@ -34,7 +35,7 @@ var
 
 		jump: function() {
 			this.velocity = -this._jump;
-			sound.play();
+			//sound.play();
 		},
 
 		update: function() {
@@ -73,21 +74,23 @@ var
 		},
 
 		draw: function(ctx) {
-			ctx.save();
+			ctx.save(); // lưu trạng thái con chim
 
 			ctx.translate(this.x, this.y);
 			ctx.rotate(this.rotation);
 
 			var n = this.animation[this.frame];
-			// vẽ từ giữa hình sang 2 bên
-			_bird[n].draw(ctx, -_bird[n].width/2, -_bird[n].height/2,this.width,this.height);
+			// vẽ con chim
+			_bird[n].draw(ctx, -_bird[n].width/2, -_bird[n].height/2, 1);
 
-			ctx.restore();//xóa hình cũ
+			ctx.restore(); // khôi phục trạng thái con chim
 		}
 	},
+
+	// mảng ống nước
 	pipes = {
 
-		//tạo mảng ống nước
+		//tạo mảng
 		_pipes: [],
 
 		reset: function() {
@@ -133,9 +136,9 @@ var
 					var r = bird.radius*bird.radius;
 
 					// va chạm
-					if (r > d1 || r > d2) {
-						currentstate = states.Score;
-					}
+					// if (r > d1 || r > d2) {
+					// 	currentstate = states.Score;
+					// }
 				}
 
 				// di chuyển ống từ phải sang trái
@@ -153,12 +156,90 @@ var
 			for (var i = 0, len = this._pipes.length; i < len; i++) {
 				var p = this._pipes[i];
 				// vẽ ống trên
-				_pipeTop.draw(ctx, p.x, p.y);
+				_pipeTop.draw(ctx, p.x, p.y, 1);
 				// ống dưới cách 80
-				_pipeBottom.draw(ctx, p.x, p.y+80+p.height);
+				_pipeBottom.draw(ctx, p.x, p.y + 80 + p.height, 1);
 			}
 		}
 	};
+
+	//mảng item
+	items = {
+
+		// tạo mảng
+		_items: [],
+
+		//item
+		item:{
+			x: 60,
+			y: 0,
+			width: 17,
+			height: 12,
+
+			frame: 0,
+			animation: [0, 1, 2, 1],
+
+			update: function() {
+				this.frame += frames % 10 === 0 ? 1 : 0;
+				this.frame %= this.animation.length;
+			},
+
+			draw: function(ctx) {
+
+				ctx.save();
+				ctx.translate(this.x, this.y);
+
+				var n = this.animation[this.frame];
+
+				_bird[n].draw(ctx, -_bird[n].width/2, -_bird[n].height/2, 0.5);
+
+				ctx.restore();
+			}
+		},
+
+		reset: function() {
+			//cho mảng = rỗng khi reset
+			this._items = [];
+		},
+
+		update:function(){
+			//300 frames thêm 1 item
+			if (frames % 300 === 0) {
+
+				var it = this.item;
+				//set vị trí giữa 2 ống nước, độ cao ngẫu nhiên
+				it.y = HEIGHT - (_fg.height + 100 + 200*Math.random());
+				it.x = 432;
+
+				this._items.push(it);
+			}
+
+			// ăn item
+			for(var it in this._items){
+				var cx = (this._items[it].x + this._items[it].width) - (bird.x + bird.width);
+				var cy = (this._items[it].y + this._items[it].height) - (bird.y + bird.height);
+				var d = Math.sqrt(cx*cx + cy*cy);
+				if (d <= 25) {
+					score += 5;
+					delete this._items[it];
+				}else{
+					this._items[it].x -= 2;
+					if (this._items[it].x < -this._items[it].width) {
+						delete this._items[it];
+					}
+				}
+			}
+
+		},
+
+		draw:function(ctx){
+			for (var it in this._items) {
+				this._items[it].update();
+				this._items[it].draw(ctx);
+			}
+		}
+
+	}
 
 // sự kiện 'onpress'
 function onpress(evt) {
@@ -176,18 +257,15 @@ function onpress(evt) {
 
 		case states.Score:
 			// vị trí click chuột
-			var mx = evt.offsetX, my = evt.offsetY;
-
-			if (mx == null || my == null) {
-				mx = evt.touches[0].clientX;
-				my = evt.touches[0].clientY;
-			}
+			var mx = evt.offsetX,
+				my = evt.offsetY;
 
 			// kiểm tra click trúng hình button ko
 			if (btnOK.x < mx && mx < btnOK.x + btnOK.width &&
 				 btnOK.y < my && my < btnOK.y + btnOK.height)
 			{
 				pipes.reset();
+				items.reset();
 				currentstate = states.Splash;
 				score = 0;
 			}
@@ -195,6 +273,8 @@ function onpress(evt) {
 
 	}
 }
+
+//main
 function main(){
 
 	WIDTH = 320;
@@ -236,6 +316,7 @@ function main(){
 		run();
 	}
 }
+
 function run(){
 	// lặp lại liên tục hàm update + render
 	var loop = function(){
@@ -251,47 +332,76 @@ function update(){
 	if (currentstate !== states.Score) {
 		//mặt đất di chuyển từ phải sang trái 2px 7 lần
 		fgPos = (fgPos - 2) % 14;
+	}else {
+		// điểm cao nhất ,lưu vào localStorage
+		best = Math.max(best, score);
+		localStorage.setItem("best", best);
 	}
+
 	if (currentstate === states.Game) {
 		pipes.update();
+		items.update();
 	}
 	bird.update();
 }
+
 //vẽ
 function render(){
 	//khung
 	ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
 	//hình nền
-	_bg.draw(ctx, 0, HEIGHT - _bg.height);
-	_bg.draw(ctx, _bg.width, HEIGHT - _bg.height);
+	_bg.draw(ctx, 0, HEIGHT - _bg.height, 1);
+	_bg.draw(ctx, _bg.width, HEIGHT - _bg.height, 1);
 
 	//ống nước
 	pipes.draw(ctx);
+
+	//item
+	items.draw(ctx);
 
 	//chim
 	bird.draw(ctx);
 
 	//mặt đất
-	_fg.draw(ctx, fgPos, HEIGHT - _fg.height);
-	_fg.draw(ctx, fgPos + _fg.width, HEIGHT - _fg.height);
+	_fg.draw(ctx, fgPos, HEIGHT - _fg.height, 1);
+	_fg.draw(ctx, fgPos + _fg.width, HEIGHT - _fg.height, 1);
 
 	if (currentstate === states.Splash) {
 		// hình + chữ GetReady
-		_splash.draw(ctx, WIDTH/2 - _splash.width/2, HEIGHT - 300);
-		_text.GetReady.draw(ctx, WIDTH/2 - _text.GetReady.width/2, HEIGHT - 380);
+		_splash.draw(ctx, WIDTH/2 - _splash.width/2, HEIGHT - 300, 1);
+		_text.GetReady.draw(ctx, WIDTH/2 - _text.GetReady.width/2, HEIGHT - 380, 1);
 	}
 
 	if (currentstate === states.Score) {
 		// vẽ chữ gameover và bảng score
-		_text.GameOver.draw(ctx, WIDTH/2 - _text.GameOver.width/2, HEIGHT - 400);
-		_score.draw(ctx, WIDTH/2 - _score.width/2, HEIGHT - 340);
+		_text.GameOver.draw(ctx, WIDTH/2 - _text.GameOver.width/2, HEIGHT - 400, 1);
+		_score.draw(ctx, WIDTH/2 - _score.width/2, HEIGHT - 340, 1);
+
+		//huy chương khi đạt điểm
+		if (score < 20) {
+			_medal.none.draw(ctx, 74, 183, 1);
+		}else{
+			if (score < 50) {
+				_medal.coper.draw(ctx, 74, 183, 1);
+			}else{
+				if(score < 100){
+					_medal.silver.draw(ctx, 74, 183, 1);
+				}else{
+					_medal.gold.draw(ctx, 74, 183, 1);
+				}
+			}
+		}
 		//vẽ nut Ok
-		_buttonOk.draw(ctx, btnOK.x, btnOK.y);
+		_buttonOk.draw(ctx, btnOK.x, btnOK.y, 1);
+
+		// điểm và điểm cao nhất
+		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 304, score);
+		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 262, best);
 
 	}else {
 		// vẽ điểm số phía trên
-		_numberS.draw(ctx, 158, 20, score);
+		_numberS.draw(ctx, 10, 20, score);
 
 	}
 }
