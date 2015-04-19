@@ -10,7 +10,12 @@ var
 	best = localStorage.getItem("best") || 0,
 
 	btnOK,
-	sound,
+	sound={
+		Jump: new Audio("sound/flap.wav"),
+		Fg_hit:new Audio("sound/fg_hit.wav"),
+		Pipe_hit:new Audio("sound/pipe_hit.wav"),
+		Item_eat:new Audio("sound/item_eat.wav")
+	},
 	currentstate,
 	states = {
 		Splash: 0, Game: 1, Score: 2
@@ -18,7 +23,7 @@ var
 	// chim
 	bird = {
 
-		x: 60,
+		x: 70,
 		y: 0,
 
 		frame: 0,
@@ -32,8 +37,9 @@ var
 		_jump: 4.6,
 
 		jump: function() {
+			//âm thanh khi nhảy
+			sound.Jump.play();
 			this.velocity = -this._jump;
-			//sound.play();
 		},
 
 		update: function() {
@@ -53,10 +59,15 @@ var
 				this.y += this.velocity; //rơi thẳng xuống
 
 				if (this.y >= HEIGHT - _fg.height-10) {//chim rơi chạm đất
+
 					this.y = HEIGHT - _fg.height-10;//cho chim nằm trên mặt đất
+
 					if (currentstate === states.Game) {
+						//âm thanh khi chạm đất
+						sound.Fg_hit.play();
 						currentstate = states.Score;
 					}
+
 					// cho vận tốc rơi bằng vận tốc nhảy lên
 					this.velocity = this._jump;
 				}
@@ -65,6 +76,7 @@ var
 				if (this.velocity >= this._jump) {
 					this.frame = 1;
 					this.rotation = Math.min(Math.PI/2, this.rotation + 0.3);
+
 				} else { // ngửng đầu khi nhảy
 					this.rotation = -0.3;
 				}
@@ -99,7 +111,9 @@ var
 		update: function() {
 			// sau 100 frames thêm 1 ống nước
 			if (frames % 100 === 0) {
+
 				var _y = HEIGHT - (_pipeTop.height + _fg.height + 120 + 200 * Math.random());
+
 				// thêm vào mảng
 				this._pipes.push({
 					x: 500,
@@ -133,16 +147,19 @@ var
 
 					var r = bird.radius*bird.radius;
 
-					// va chạm
-					// if (r > d1 || r > d2) {
-					// 	currentstate = states.Score;
-					// }
+					//va chạm
+					if (r > d1 || r > d2) {
+
+						//âm thanh khi va vào ống
+						sound.Pipe_hit.play();
+						currentstate = states.Score;
+					}
 				}
 
 				// di chuyển ống từ phải sang trái
 				p.x -= 2;
-
-				if (p.x < -p.width) {         //vượt khung
+				//vượt khung
+				if (p.x < -p.width) {
 					this._pipes.splice(i, 1); //xóa 1 ống vị trí i
 					i--;
 					len--;
@@ -169,7 +186,7 @@ var
 
 		//item
 		item:{
-			x: 60,
+			x: 0,
 			y: 0,
 			width: 17,
 			height: 12,
@@ -220,8 +237,13 @@ var
 				var cy = this._items[it].y - bird.y;
 				var d = Math.sqrt(cx*cx + cy*cy);
 
+				//va chạm
 				if (d <= (bird.radius + this._items[it].radius)) {
 
+					//âm thanh khi ăn item
+					sound.Item_eat.play();
+
+					//tăng 5 điểm khi ăn
 					score += 5;
 					delete this._items[it];
 
@@ -253,17 +275,23 @@ function onpress(evt) {
 
 		case states.Splash:
 			currentstate = states.Game;
-			bird.jump(); // thay đổi vận tốc chim
+			bird.jump(); // nhảy
 			break;
 
 		case states.Game:
-			bird.jump();// thay đổi vận tốc chim
+			bird.jump();
 			break;
 
 		case states.Score:
 			// vị trí click chuột
 			var mx = evt.offsetX,
 				my = evt.offsetY;
+
+			// touches cho mobile
+			if (mx == null || my == null) {
+				mx = evt.touches[0].clientX;
+				my = evt.touches[0].clientY;
+			}
 
 			// kiểm tra click trúng hình button ko
 			if (btnOK.x < mx && mx < btnOK.x + btnOK.width &&
@@ -282,18 +310,29 @@ function onpress(evt) {
 //main
 function main(){
 
-	WIDTH = 320;
-	HEIGHT = 480;
-
 	canvas = document.createElement("canvas");
+	WIDTH = window.innerWidth;
+	HEIGHT = window.innerHeight;
+
 	canvas.style.border = "1px solid #000";
 
 	//chạy sự kiện 'onpress' khi bấm chuột
-	var evt ="mousedown";
+	var evt = "touchstart";
+	if (WIDTH >= 500) {
+		WIDTH  = 320;
+		HEIGHT = 480;
+		canvas.style.border = "1px solid #000";
+		evt = "mousedown";
+	}
 	document.addEventListener(evt, onpress);
 
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
+
+	var canvasCheck = (canvas.getContext)?true:false;
+	if (!canvasCheck) {
+		alert("Your browser doesn't support HTML5, please update to latest version");
+	}
 	ctx = canvas.getContext("2d");
 
 	currentstate = states.Splash;
@@ -301,7 +340,7 @@ function main(){
 	document.body.appendChild(canvas);
 
 	//tạo file âm thanh
-	sound = new Audio("sound/jump.wav");
+
 
 	//load hình
 	var img = new Image();
