@@ -20,8 +20,6 @@ var
 
 		x: 60,
 		y: 0,
-		width: 34,
-		height: 24,
 
 		frame: 0,
 		velocity: 0,
@@ -175,6 +173,7 @@ var
 			y: 0,
 			width: 17,
 			height: 12,
+			radius: 6,
 
 			frame: 0,
 			animation: [0, 1, 2, 1],
@@ -216,13 +215,18 @@ var
 
 			// ăn item
 			for(var it in this._items){
-				var cx = (this._items[it].x + this._items[it].width) - (bird.x + bird.width);
-				var cy = (this._items[it].y + this._items[it].height) - (bird.y + bird.height);
+				//tính khoảng cách
+				var cx = this._items[it].x - bird.x;
+				var cy = this._items[it].y - bird.y;
 				var d = Math.sqrt(cx*cx + cy*cy);
-				if (d <= 25) {
+
+				if (d <= (bird.radius + this._items[it].radius)) {
+
 					score += 5;
 					delete this._items[it];
+
 				}else{
+
 					this._items[it].x -= 2;
 					if (this._items[it].x < -this._items[it].width) {
 						delete this._items[it];
@@ -233,6 +237,7 @@ var
 		},
 
 		draw:function(ctx){
+
 			for (var it in this._items) {
 				this._items[it].update();
 				this._items[it].draw(ctx);
@@ -241,7 +246,7 @@ var
 
 	}
 
-// sự kiện 'onpress'
+// tạo sự kiện 'onpress'
 function onpress(evt) {
 
 	switch (currentstate) {
@@ -302,7 +307,9 @@ function main(){
 	var img = new Image();
 	img.src = "image/sheet.png";
 	img.onload = function(){
+
 		initSprites(this);
+		//màu nền
 		ctx.fillStyle = _bg.color;
 
 		//tạo nut OK
