@@ -329,7 +329,7 @@ function main(){
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
 
-	var canvasCheck = (canvas.getContext)?true:false;
+	var canvasCheck = (canvas.getContext) ? true : false;
 	if (!canvasCheck) {
 		alert("Your browser doesn't support HTML5, please update to latest version");
 	}
