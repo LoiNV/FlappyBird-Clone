@@ -14,9 +14,9 @@ var
 	//IE not support sound .wav
 	sound={
 		Jump: new Audio("sound/flap.wav"),
-		Fg_hit:new Audio("sound/fg_hit.wav"),
-		Pipe_hit:new Audio("sound/pipe_hit.wav"),
-		Item_eat:new Audio("sound/item_eat.wav")
+		Fg_hit: new Audio("sound/fg_hit.wav"),
+		Pipe_hit: new Audio("sound/pipe_hit.wav"),
+		Item_eat: new Audio("sound/item_eat.wav")
 	},
 
 	currentstate,
@@ -102,7 +102,6 @@ var
 		}
 	},
 
-	// mảng ống nước
 	pipes = {
 
 		//tạo mảng
@@ -180,7 +179,6 @@ var
 		}
 	},
 
-	//mảng item
 	items = {
 
 		// tạo mảng
@@ -290,8 +288,8 @@ function onpress(evt) {
 
 			// touches cho mobile
 			if (mx == null || my == null) {
-				mx = evt.touches[0].clientX;
-				my = evt.touches[0].clientY;
+				mx = evt.changedTouches[0].clientX;
+				my = evt.changedTouches[0].clientY;
 			}
 
 			// kiểm tra click trúng hình button ko
