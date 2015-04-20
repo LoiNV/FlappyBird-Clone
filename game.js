@@ -7,19 +7,24 @@ var
 	fgPos = 0,
 	frames = 0,
 	score = 0,
-	best = localStorage.getItem("best") || 0,
+	best = 0,
 
 	btnOK,
+
+	//IE not support sound .wav
 	sound={
 		Jump: new Audio("sound/flap.wav"),
 		Fg_hit:new Audio("sound/fg_hit.wav"),
 		Pipe_hit:new Audio("sound/pipe_hit.wav"),
 		Item_eat:new Audio("sound/item_eat.wav")
 	},
+
 	currentstate,
+
 	states = {
 		Splash: 0, Game: 1, Score: 2
 	},
+
 	// chim
 	bird = {
 
@@ -125,36 +130,33 @@ var
 			for (var i = 0, len = this._pipes.length; i < len; i++) {
 				var p = this._pipes[i];
 
-				if (i === 0) {
-					//tăng 1 điểm khi đến ống
-					score += p.x === bird.x ? 1 : 0;
+				// kiểm tra va chạm
+				// lấy vị trí gần nhất giữa chim và ống
+				var cx  = Math.min(Math.max(bird.x, p.x), p.x+p.width);
+				var cy1 = Math.min(Math.max(bird.y, p.y), p.y+p.height);
+				var cy2 = Math.min(Math.max(bird.y, p.y+p.height+80), p.y+2*p.height+80);
 
-					// kiểm tra va chạm
+				// chênh lệch tọa độ
+				var dx  = bird.x - cx;
+				var dy1 = bird.y - cy1;
+				var dy2 = bird.y - cy2;
 
-					// lấy vị trí gần nhất giữa chim và ống
-					var cx  = Math.min(Math.max(bird.x, p.x), p.x+p.width);
-					var cy1 = Math.min(Math.max(bird.y, p.y), p.y+p.height);
-					var cy2 = Math.min(Math.max(bird.y, p.y+p.height+80), p.y+2*p.height+80);
+				// tính khoảng cách bằng Pytago
+				var d1 = dx*dx + dy1*dy1;
+				var d2 = dx*dx + dy2*dy2;
 
-					// chênh lệch tọa độ
-					var dx  = bird.x - cx;
-					var dy1 = bird.y - cy1;
-					var dy2 = bird.y - cy2;
+				var r = bird.radius*bird.radius;
 
-					// tính khoảng cách bằng Pytago
-					var d1 = dx*dx + dy1*dy1;
-					var d2 = dx*dx + dy2*dy2;
+				//va chạm
+				if (r > d1 || r > d2) {
 
-					var r = bird.radius*bird.radius;
-
-					//va chạm
-					if (r > d1 || r > d2) {
-
-						//âm thanh khi va vào ống
-						sound.Pipe_hit.play();
-						currentstate = states.Score;
-					}
+					//âm thanh khi va vào ống
+					sound.Pipe_hit.play();
+					currentstate = states.Score;
 				}
+
+				//tăng 1 điểm khi qua ống
+				score += (p.x + p.width) === bird.x ? 1 : 0;
 
 				// di chuyển ống từ phải sang trái
 				p.x -= 2;
@@ -176,7 +178,7 @@ var
 				_pipeBottom.draw(ctx, p.x, p.y + 80 + p.height, 1);
 			}
 		}
-	};
+	},
 
 	//mảng item
 	items = {
@@ -265,8 +267,7 @@ var
 				this._items[it].draw(ctx);
 			}
 		}
-
-	}
+	};
 
 // tạo sự kiện 'onpress'
 function onpress(evt) {
@@ -284,8 +285,8 @@ function onpress(evt) {
 
 		case states.Score:
 			// vị trí click chuột
-			var mx = evt.offsetX,
-				my = evt.offsetY;
+			var mx = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
+				my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
 
 			// touches cho mobile
 			if (mx == null || my == null) {
@@ -336,11 +337,22 @@ function main(){
 	ctx = canvas.getContext("2d");
 
 	currentstate = states.Splash;
+
 	// thêm canvas vào document
 	document.body.appendChild(canvas);
 
-	//tạo file âm thanh
+	if((typeof(window.localStorage) !== "undefined")) {
 
+		if (window.localStorage.getItem("best") != null) {
+			best = window.localStorage.getItem("best");
+		}else{
+			best = 0;
+		}
+
+	} else {
+		// IE 11 not support localStorage
+		alert("Sorry! No Web Storage support...");
+	}
 
 	//load hình
 	var img = new Image();
@@ -381,7 +393,9 @@ function update(){
 	}else {
 		// điểm cao nhất ,lưu vào localStorage
 		best = Math.max(best, score);
-		localStorage.setItem("best", best);
+		if((typeof(localStorage) !== "undefined")) {
+    		window.localStorage.setItem("best", best);
+		}
 	}
 
 	if (currentstate === states.Game) {
