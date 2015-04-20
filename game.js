@@ -11,12 +11,11 @@ var
 
 	btnOK,
 
-	//IE not support sound .wav
 	sound={
-		Jump: new Audio("sound/flap.wav"),
-		Fg_hit: new Audio("sound/fg_hit.wav"),
-		Pipe_hit: new Audio("sound/pipe_hit.wav"),
-		Item_eat: new Audio("sound/item_eat.wav")
+		Jump: new Audio("sound/flap.mp3"),
+		Fg_hit: new Audio("sound/fg_hit.mp3"),
+		Pipe_hit: new Audio("sound/pipe_hit.mp3"),
+		Item_eat: new Audio("sound/item_eat.mp3")
 	},
 
 	currentstate,
