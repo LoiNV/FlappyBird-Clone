@@ -67,13 +67,17 @@ function initSprites(img) {
 	_numberS = new Sprite(img, 0, 376, 14, 20);
 
 
-	_numberS.draw = _numberB.draw = function(ctx, x, y, num)
+	_numberS.draw = _numberB.draw = function(ctx, x, y, num, center)
 	{
 		num = num.toString();
 
 		var step = this.width + 2;
 
-		x += step*(10 - num.length);
+		if (center!= null) {
+			x = center - (num.length*step-2)/2;
+		}else{
+			x += step*(10 - num.length);
+		}
 
 		for (var i = 0, len = num.length; i < len; i++) {
 			var n = parseInt(num[i]);

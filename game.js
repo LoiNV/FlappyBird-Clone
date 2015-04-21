@@ -277,18 +277,19 @@ function onpress(evt) {
 			break;
 
 		case states.Game:
+
 			bird.jump();
 			break;
 
 		case states.Score:
 			// vị trí click chuột
 			var mx = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
-				my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
+			var	my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
 
 			// touches cho mobile
-			if (mx == null || my == null) {
-				mx = evt.changedTouches[0].clientX;
-				my = evt.changedTouches[0].clientY;
+			if (mx == 0 || mx == null || my == 0 || my == null) {
+				var mx = evt.touches[0].pageX;
+				var	my = evt.touches[0].pageY;
 			}
 
 			// kiểm tra click trúng hình button ko
@@ -437,15 +438,15 @@ function render(){
 
 		//huy chương khi đạt điểm
 		if (score < 20) {
-			_medal.none.draw(ctx, 74, 183, 1);
+			_medal.none.draw(ctx, WIDTH/2 - _medal.none.width/2 - 63, HEIGHT - 297, 1);
 		}else{
 			if (score < 50) {
-				_medal.coper.draw(ctx, 74, 183, 1);
+				_medal.coper.draw(ctx, WIDTH/2 - _medal.coper.width/2 - 63, HEIGHT - 297, 1);
 			}else{
 				if(score < 100){
-					_medal.silver.draw(ctx, 74, 183, 1);
+					_medal.silver.draw(ctx, WIDTH/2 - _medal.silver.width/2 - 63, HEIGHT - 297, 1);
 				}else{
-					_medal.gold.draw(ctx, 74, 183, 1);
+					_medal.gold.draw(ctx, WIDTH/2 - _medal.gold.width/2 - 63, HEIGHT - 297, 1);
 				}
 			}
 		}
@@ -453,12 +454,12 @@ function render(){
 		_buttonOk.draw(ctx, btnOK.x, btnOK.y, 1);
 
 		// điểm và điểm cao nhất
-		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 304, score);
-		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 262, best);
+		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 304, score, null);
+		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 262, best, null);
 
 	}else {
 		// vẽ điểm số phía trên
-		_numberS.draw(ctx, 10, 20, score);
+		_numberS.draw(ctx, null, 20, score, WIDTH/2);
 
 	}
 }
