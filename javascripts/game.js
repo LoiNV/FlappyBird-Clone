@@ -324,7 +324,6 @@ function main(){
 	if (WIDTH >= 400) {
 		WIDTH  = 320;
 		HEIGHT = 480;
-		canvas.style.border = "1px solid #000";
 		evt = "mousedown";
 	}
 	document.addEventListener(evt, onpress);
@@ -413,8 +412,8 @@ function render(){
 	ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
 	//hình nền
-	_bg.draw(ctx, 0, HEIGHT - _bg.height, 1);
-	_bg.draw(ctx, _bg.width, HEIGHT - _bg.height, 1);
+	_bg.draw(ctx, 0, HEIGHT - _bg.height - 30, 1);
+	_bg.draw(ctx, _bg.width, HEIGHT - _bg.height - 30, 1);
 
 	//ống nước
 	pipes.draw(ctx);
