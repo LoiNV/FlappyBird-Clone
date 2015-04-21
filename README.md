@@ -1,2 +1,2 @@
 # PRJ_SEM1
-read me
+loinv_c00615@fpt.aptech.ac.vn
