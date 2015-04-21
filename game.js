@@ -76,6 +76,10 @@ var
 					this.velocity = this._jump;
 				}
 
+				if (this.y <= 0) { //cham khung
+					this.y = 20;
+				}
+
 				// chúc đầu xuống khi rơi
 				if (this.velocity >= this._jump) {
 					this.frame = 1;
@@ -317,7 +321,7 @@ function main(){
 
 	//chạy sự kiện 'onpress' khi bấm chuột
 	var evt = "touchstart";
-	if (WIDTH >= 500) {
+	if (WIDTH >= 400) {
 		WIDTH  = 320;
 		HEIGHT = 480;
 		canvas.style.border = "1px solid #000";
