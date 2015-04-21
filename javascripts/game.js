@@ -272,29 +272,45 @@ var
 
 // tạo sự kiện 'onpress'
 function onpress(evt) {
+	//tọa độ click chuột toàn màn hình
+	var cx = evt.clientX;
+	var cy = evt.clientY;
+
+	if (cx == 0 || cx == null || cy == 0 || cy == null) {
+		//tọa độ tap trong mobile
+		var cx = evt.touches[0].clientX;
+		var	cy = evt.touches[0].clientY;
+	}
 
 	switch (currentstate) {
 
 		case states.Splash:
-			currentstate = states.Game;
-			bird.jump(); // nhảy
+			//kiểm tra xem có click vào khung hình hay ko
+			if ((window.innerWidth - canvas.width)/2 <= cx && cx < (window.innerWidth + canvas.width)/2 &&
+				(window.innerHeight - canvas.height)/2 <= cy && cy < (window.innerHeight + canvas.height)/2) {
+
+				currentstate = states.Game;
+				bird.jump(); // nhảy
+			}
+
 			break;
 
 		case states.Game:
 
-			bird.jump();
+			bird.jump();// nhảy
 			break;
 
 		case states.Score:
-			// vị trí click chuột
+			// tọa độ click chuột trong khung hình
 			var mx = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
 			var	my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
 
-			// touches cho mobile
+			// tọa độ tap trong mobile
 			if (mx == 0 || mx == null || my == 0 || my == null) {
 				var mx = evt.touches[0].pageX;
 				var	my = evt.touches[0].pageY;
 			}
+			console.log("mx = "+mx);
 
 			// kiểm tra click trúng hình button ko
 			if (btnOK.x < mx && mx < btnOK.x + btnOK.width &&
