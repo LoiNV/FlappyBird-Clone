@@ -21,7 +21,7 @@ var
 	currentstate,
 
 	states = {
-		Splash: 0, Game: 1, Score: 2
+		Splash: 0, Game: 1, Score: 2, Pause: 3
 	},
 
 	// chim
@@ -241,7 +241,7 @@ var
 				var d = Math.sqrt(cx*cx + cy*cy);
 
 				//va chạm
-				if (d <= (bird.radius + this._items[it].radius)) {
+				if (d <= 25) {
 
 					//âm thanh khi ăn item
 					sound.Item_eat.play();
@@ -270,7 +270,7 @@ var
 		}
 	};
 
-// tạo sự kiện 'onpress'
+// tạo sự kiện click 'onpress'
 function onpress(evt) {
 	//tọa độ click chuột toàn màn hình
 	var cx = evt.clientX;
@@ -280,6 +280,16 @@ function onpress(evt) {
 		//tọa độ tap trong mobile
 		var cx = evt.touches[0].clientX;
 		var	cy = evt.touches[0].clientY;
+	}
+
+	// tọa độ click chuột trong khung hình
+	var mx = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
+	var	my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
+
+	// tọa độ tap trong mobile
+	if (mx == 0 || mx == null || my == 0 || my == null) {
+		var mx = evt.touches[0].pageX;
+		var	my = evt.touches[0].pageY;
 	}
 
 	switch (currentstate) {
@@ -297,20 +307,19 @@ function onpress(evt) {
 
 		case states.Game:
 
-			bird.jump();// nhảy
+			// click nút pause
+			if (btnPause.x < mx && mx < btnPause.x + btnPause.width &&
+				btnPause.y < my && my < btnPause.y + btnPause.height)
+			{
+				//nút play
+				_buttons.Play.draw(ctx, btnPause.x, btnPause.y, 1);
+
+				currentstate = states.Pause; // pause game
+			}else
+				bird.jump();// nhảy
 			break;
 
 		case states.Score:
-			// tọa độ click chuột trong khung hình
-			var mx = evt.offsetX == undefined ? evt.layerX : evt.offsetX;
-			var	my = evt.offsetY == undefined ? evt.layerY : evt.offsetY;
-
-			// tọa độ tap trong mobile
-			if (mx == 0 || mx == null || my == 0 || my == null) {
-				var mx = evt.touches[0].pageX;
-				var	my = evt.touches[0].pageY;
-			}
-			console.log("mx = "+mx);
 
 			// kiểm tra click trúng hình button ko
 			if (btnOK.x < mx && mx < btnOK.x + btnOK.width &&
@@ -322,7 +331,61 @@ function onpress(evt) {
 				score = 0;
 			}
 			break;
+		case states.Pause:
+			if (btnPause.x < mx && mx < btnPause.x + btnPause.width &&
+				btnPause.y < my && my < btnPause.y + btnPause.height)
+			{
+				currentstate = states.Game;
+			}
+			break;
+	}
+}
 
+//sự kiện ấn phím 'onkey'
+function onkey(e){
+
+	switch (currentstate) {
+
+		case states.Splash:
+
+			// ấn space
+			if(e.keyCode == '32'){
+				currentstate = states.Game;
+				bird.jump(); // nhảy
+			}
+			break;
+
+		case states.Game:
+
+			// ấn P hoặc p
+			if (e.keyCode == '80' || e.keyCode == '112')
+			{
+				//nút play
+				_buttons.Play.draw(ctx, btnPause.x, btnPause.y, 1);
+
+				currentstate = states.Pause; // pause game
+			}
+
+			if (e.keyCode == '32') {
+				bird.jump();// nhảy
+			}
+			break;
+
+		case states.Score:
+
+			pipes.reset();
+			items.reset();
+			currentstate = states.Splash;
+			score = 0;
+			break;
+
+		case states.Pause:
+
+			if (e.keyCode == '80' || e.keyCode == '112')
+			{
+				currentstate = states.Game;
+			}
+			break;
 	}
 }
 
@@ -337,12 +400,15 @@ function main(){
 
 	//chạy sự kiện 'onpress' khi bấm chuột
 	var evt = "touchstart";
-	if (WIDTH >= 400) {
+	if (WIDTH >= 450) {
 		WIDTH  = 320;
 		HEIGHT = 480;
 		evt = "mousedown";
 	}
 	document.addEventListener(evt, onpress);
+
+	//sự kiện ấn phím
+	document.addEventListener("keypress", onkey);
 
 	canvas.width = WIDTH;
 	canvas.height = HEIGHT;
@@ -382,10 +448,17 @@ function main(){
 
 		//tạo nut OK
 		btnOK = {
-			x: (WIDTH - _buttonOk.width)/2,
+			x: (WIDTH - _buttons.Ok.width)/2,
 			y: HEIGHT - 200,
-			width: _buttonOk.width,
-			height: _buttonOk.height
+			width: _buttons.Ok.width,
+			height: _buttons.Ok.height
+		}
+		//
+		btnPause = {
+			x: 25,
+			y: 30,
+			width: _buttons.Pause.width,
+			height: _buttons.Pause.height
 		}
 
 		run();
@@ -395,8 +468,12 @@ function main(){
 function run(){
 	// lặp lại liên tục hàm update + render
 	var loop = function(){
-		update();
-		render();
+
+		// kiểm tra trạng thái tạm dừng
+		if (currentstate !== states.Pause) {
+			update();
+			render();
+		}
 		window.requestAnimationFrame(loop,canvas);
 	}
 	window.requestAnimationFrame(loop,canvas);
@@ -406,7 +483,7 @@ function update(){
 	frames++;
 	if (currentstate !== states.Score) {
 		//mặt đất di chuyển từ phải sang trái 2px 7 lần
-		fgPos = (fgPos - 2) % 14;
+		fgPos = (fgPos - 2) % 28;
 	}else {
 		// điểm cao nhất ,lưu vào localStorage
 		best = Math.max(best, score);
@@ -448,6 +525,9 @@ function render(){
 		// hình + chữ GetReady
 		_splash.draw(ctx, WIDTH/2 - _splash.width/2, HEIGHT - 300, 1);
 		_text.GetReady.draw(ctx, WIDTH/2 - _text.GetReady.width/2, HEIGHT - 380, 1);
+		//text
+		ctx.font="14px Verdana";
+		ctx.fillText("press Space to jump, P to pause/play", 30, HEIGHT - 20);
 	}
 
 	if (currentstate === states.Score) {
@@ -470,7 +550,7 @@ function render(){
 			}
 		}
 		//vẽ nut Ok
-		_buttonOk.draw(ctx, btnOK.x, btnOK.y, 1);
+		_buttons.Ok.draw(ctx, btnOK.x, btnOK.y, 1);
 
 		// điểm và điểm cao nhất
 		_numberB.draw(ctx, WIDTH/2 - 47, HEIGHT - 304, score, null);
@@ -479,6 +559,8 @@ function render(){
 	}else {
 		// vẽ điểm số phía trên
 		_numberS.draw(ctx, null, 20, score, WIDTH/2);
+		// nút pause
+		_buttons.Pause.draw(ctx, btnPause.x, btnPause.y, 1);
 
 	}
 }
