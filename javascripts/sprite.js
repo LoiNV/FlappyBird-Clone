@@ -46,7 +46,11 @@ function initSprites(img) {
 	_pipeBottom = new Sprite(img, 502, 0, 52, 400);
 	_pipeTop = new Sprite(img, 554, 0, 52, 400);
 
-	_buttonOk = new Sprite(img, 238, 382, 80, 28)
+	_buttons = {
+		Ok: new Sprite(img, 238, 382, 80, 28),
+		Pause: new Sprite(img, 398, 354, 28, 27),
+		Play: new Sprite(img, 398, 382, 28, 27)
+	}
 
 	_text = {
 		GameOver: new Sprite(img, 118, 272, 188, 38),

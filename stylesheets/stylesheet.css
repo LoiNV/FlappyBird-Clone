@@ -450,6 +450,7 @@ a:hover {
 header {
   padding-top: 40px;
   padding-bottom: 40px;
+  margin-bottom: 10px;
   font-family: 'Architects Daughter', 'Helvetica Neue', Helvetica, Arial, serif;
   background: #2e7bcf url(../images/header-bg.jpg) 0 0 repeat-x;
   border-bottom: solid 1px #275da1;
@@ -502,6 +503,7 @@ aside#sidebar {
   width: 200px;
   min-height: 504px;
   padding-left: 20px;
+  margin-right: 70px;
   font-size: 12px;
   line-height: 1.3;
   background: transparent url(../images/sidebar-bg.jpg) 0 0 no-repeat;
