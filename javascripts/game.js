@@ -4,6 +4,7 @@ var
 	WIDTH,
 	HEIGHT,
 
+	spd = 2,
 	fgPos = 0,
 	frames = 0,
 	score = 0,
@@ -161,7 +162,7 @@ var
 				score += (p.x + p.width) === bird.x ? 1 : 0;
 
 				// di chuyển ống từ phải sang trái
-				p.x -= 2;
+				p.x -= spd;
 				//vượt khung
 				if (p.x < -p.width) {
 					this._pipes.splice(i, 1); //xóa 1 ống vị trí i
@@ -252,7 +253,7 @@ var
 
 				}else{
 
-					this._items[it].x -= 2;
+					this._items[it].x -= spd;
 					if (this._items[it].x < -this._items[it].width) {
 						delete this._items[it];
 					}
@@ -439,7 +440,7 @@ function main(){
 
 	//load hình
 	var img = new Image();
-	img.src = "image/sheet.png";
+	img.src = "images/sheet.png";
 	img.onload = function(){
 
 		initSprites(this);
@@ -482,8 +483,8 @@ function run(){
 function update(){
 	frames++;
 	if (currentstate !== states.Score) {
-		//mặt đất di chuyển từ phải sang trái 2px 7 lần
-		fgPos = (fgPos - 2) % 28;
+		//mặt đất di chuyển từ phải sang trái 2
+		fgPos = (fgPos - spd) % 28;
 	}else {
 		// điểm cao nhất ,lưu vào localStorage
 		best = Math.max(best, score);
