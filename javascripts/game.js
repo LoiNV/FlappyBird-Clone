@@ -289,8 +289,8 @@ function onpress(evt) {
 
 	// tọa độ tap trong mobile
 	if (mx == 0 || mx == null || my == 0 || my == null) {
-		var mx = evt.touches[0].pageX;
-		var	my = evt.touches[0].pageY;
+		var mx = evt.touches[0].clientX;
+		var	my = evt.touches[0].clientY;
 	}
 
 	switch (currentstate) {
