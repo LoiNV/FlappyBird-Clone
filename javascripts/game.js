@@ -456,8 +456,8 @@ function main(){
 		}
 		//
 		btnPause = {
-			x: 25,
-			y: 30,
+			x: 20,
+			y: 20,
 			width: _buttons.Pause.width,
 			height: _buttons.Pause.height
 		}
@@ -559,7 +559,7 @@ function render(){
 
 	}else {
 		// vẽ điểm số phía trên
-		_numberS.draw(ctx, null, 20, score, WIDTH/2);
+		_numberS.draw(ctx, null, 21, score, WIDTH/2);
 		// nút pause
 		_buttons.Pause.draw(ctx, btnPause.x, btnPause.y, 1);
 
